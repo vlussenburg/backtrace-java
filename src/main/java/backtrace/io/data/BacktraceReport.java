@@ -186,9 +186,9 @@ public class BacktraceReport implements Serializable {
             Map<String, Object> attributes,
             List<String> attachmentPaths) {
 
-        this.attributes = attributes == null ? new HashMap<String, Object>() {
+        this.attributes = attributes == null ? Collections.EMPTY_SET {
         } : attributes;
-        this.attachmentPaths = attachmentPaths == null ? new ArrayList<>() : attachmentPaths;
+        this.attachmentPaths = attachmentPaths == null ? Collections.EMPTY_LIST : attachmentPaths;
         this.exception = exception;
         this.exceptionTypeReport = exception != null;
         this.diagnosticStack = new BacktraceStackTrace(exception).getStackFrames();
