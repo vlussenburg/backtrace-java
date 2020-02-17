@@ -9,6 +9,7 @@ public class BacktraceThread extends Thread {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BacktraceThread.class);
     private final static String THREAD_NAME = "backtrace-daemon";
     private Backtrace backtrace;
+    private static BacktraceThread BACKTRACE_DAEMON;
 
     /**
      * Creates new thread for handling and sending error reports passed to queue
@@ -29,10 +30,21 @@ public class BacktraceThread extends Thread {
      */
     static void init(BacktraceConfig config, ConcurrentLinkedQueue<BacktraceMessage> queue) {
         LOGGER.info("Initialize BacktraceThread");
-        BacktraceThread thread = new BacktraceThread(config, queue);
-        thread.setDaemon(true);
-        thread.setName(THREAD_NAME);
-        thread.start();
+        BACKTRACE_DAEMON = new BacktraceThread(config, queue);
+        BACKTRACE_DAEMON.setDaemon(true);
+        BACKTRACE_DAEMON.setName(THREAD_NAME);
+        BACKTRACE_DAEMON.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            @Override
+            public void run() {
+                try {
+                    BACKTRACE_DAEMON.join();
+                } catch (InterruptedException e) {
+                    LOGGER.error("Interrupted waiting for the daemon thread to finish.", e);
+                }
+            }
+        });
     }
 
     @Override
