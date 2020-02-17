@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BacktraceThread extends Thread {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BacktraceThread.class);
-    private final static String THREAD_NAME = "backtrace-deamon";
+    private final static String THREAD_NAME = "backtrace-daemon";
     private Backtrace backtrace;
 
     /**
