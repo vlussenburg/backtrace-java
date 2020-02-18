@@ -11,11 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 class Backtrace {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(Backtrace.class);
-    private Queue<BacktraceMessage> queue;
+    private BlockingQueue<BacktraceMessage> queue;
     private BacktraceDatabase database;
     private final BacktraceConfig config;
 
@@ -25,7 +26,7 @@ class Backtrace {
      * @param config Library configuration
      * @param queue  Queue containing error reports that should be sent to the Backtrace console
      */
-    Backtrace(BacktraceConfig config, Queue<BacktraceMessage> queue) {
+    Backtrace(BacktraceConfig config, BlockingQueue<BacktraceMessage> queue) {
         this.database = BacktraceDatabase.init(config, queue);
         this.config = config;
         this.queue = queue;
@@ -34,19 +35,12 @@ class Backtrace {
     /**
      * Handles the queue of incoming error reports
      */
-    void handleBacktraceMessages() {
-        while (true) {
-            try {
-                BacktraceMessage message = queue.poll();
-
-                if (message == null) {
-                    continue;
-                }
-
-                processSingleBacktraceMessage(message);
-            } catch (Exception e) {
-                LOGGER.error("Exception during pipeline for message from queue..", e);
-            }
+    void waitForAndHandleBacktraceMessage() {
+        try {
+            BacktraceMessage message = queue.take();
+            processSingleBacktraceMessage(message);
+        } catch (InterruptedException e) {
+            LOGGER.error("Exception during pipeline for message from queue..", e);
         }
     }
 
@@ -71,7 +65,7 @@ class Backtrace {
 
         BacktraceResult result = this.sendReport(backtraceData);
 
-        this.handleResponse(result, backtraceMessage);
+            this.handleResponse(result, backtraceMessage);
 
         OnServerResponseEvent callback = backtraceMessage.getCallback();
         if (callback != null) {

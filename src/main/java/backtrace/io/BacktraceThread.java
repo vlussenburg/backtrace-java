@@ -4,13 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BacktraceThread extends Thread {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BacktraceThread.class);
     private final static String THREAD_NAME = "backtrace-daemon";
     private final Backtrace backtrace;
     private static BacktraceThread BACKTRACE_DAEMON;
+    private boolean running = true;
 
     /**
      * Creates new thread for handling and sending error reports passed to queue
@@ -31,6 +31,7 @@ public class BacktraceThread extends Thread {
      */
     static void init(BacktraceConfig config, BlockingQueue<BacktraceMessage> queue) {
         LOGGER.info("Initialize BacktraceThread");
+
         BACKTRACE_DAEMON = new BacktraceThread(config, queue);
         BACKTRACE_DAEMON.setDaemon(true);
         BACKTRACE_DAEMON.setName(THREAD_NAME);
@@ -40,6 +41,8 @@ public class BacktraceThread extends Thread {
             @Override
             public void run() {
                 try {
+                    BACKTRACE_DAEMON.running = false;
+                    BACKTRACE_DAEMON.interrupt();
                     BACKTRACE_DAEMON.join();
                 } catch (InterruptedException e) {
                     LOGGER.error("Interrupted waiting for the daemon thread to finish.", e);
@@ -50,6 +53,8 @@ public class BacktraceThread extends Thread {
 
     @Override
     public void run() {
-        backtrace.handleBacktraceMessages();
+        while (running) {
+            backtrace.waitForAndHandleBacktraceMessage();
+        }
     }
 }
