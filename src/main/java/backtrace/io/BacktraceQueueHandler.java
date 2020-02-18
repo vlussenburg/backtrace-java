@@ -5,10 +5,13 @@ import backtrace.io.data.BacktraceReport;
 import backtrace.io.events.OnServerResponseEvent;
 
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 class BacktraceQueueHandler {
-    private ConcurrentLinkedQueue<BacktraceMessage> queue;
+    private BlockingQueue<BacktraceMessage> queue;
 
     /**
      * Creates instance of BacktraceQueueHandler
@@ -16,7 +19,7 @@ class BacktraceQueueHandler {
      * @param config Library configuration
      */
     BacktraceQueueHandler(BacktraceConfig config) {
-        queue = new ConcurrentLinkedQueue<>();
+        queue = new LinkedBlockingQueue<>();
         BacktraceThread.init(config, queue);
     }
 

@@ -3,12 +3,13 @@ package backtrace.io;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BacktraceThread extends Thread {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BacktraceThread.class);
     private final static String THREAD_NAME = "backtrace-daemon";
-    private Backtrace backtrace;
+    private final Backtrace backtrace;
     private static BacktraceThread BACKTRACE_DAEMON;
 
     /**
@@ -17,7 +18,7 @@ public class BacktraceThread extends Thread {
      * @param config library configuration
      * @param queue  queue containing error reports that should be sent to the Backtrace console
      */
-    private BacktraceThread(BacktraceConfig config, ConcurrentLinkedQueue<BacktraceMessage> queue) {
+    private BacktraceThread(BacktraceConfig config, BlockingQueue<BacktraceMessage> queue) {
         super();
         this.backtrace = new Backtrace(config, queue);
     }
@@ -28,7 +29,7 @@ public class BacktraceThread extends Thread {
      * @param config library configuration
      * @param queue  queue containing error reports that should be sent to the Backtrace console
      */
-    static void init(BacktraceConfig config, ConcurrentLinkedQueue<BacktraceMessage> queue) {
+    static void init(BacktraceConfig config, BlockingQueue<BacktraceMessage> queue) {
         LOGGER.info("Initialize BacktraceThread");
         BACKTRACE_DAEMON = new BacktraceThread(config, queue);
         BACKTRACE_DAEMON.setDaemon(true);

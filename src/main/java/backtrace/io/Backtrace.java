@@ -10,11 +10,12 @@ import backtrace.io.http.BacktraceResultStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 class Backtrace {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(Backtrace.class);
-    private ConcurrentLinkedQueue<BacktraceMessage> queue;
+    private Queue<BacktraceMessage> queue;
     private BacktraceDatabase database;
     private final BacktraceConfig config;
 
@@ -24,7 +25,7 @@ class Backtrace {
      * @param config Library configuration
      * @param queue  Queue containing error reports that should be sent to the Backtrace console
      */
-    Backtrace(BacktraceConfig config, ConcurrentLinkedQueue<BacktraceMessage> queue) {
+    Backtrace(BacktraceConfig config, Queue<BacktraceMessage> queue) {
         this.database = BacktraceDatabase.init(config, queue);
         this.config = config;
         this.queue = queue;
